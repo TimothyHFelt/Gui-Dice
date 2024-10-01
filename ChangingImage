@@ -1,0 +1,170 @@
+package changingImage;
+
+import java.awt.EventQueue;
+import java.awt.Graphics;
+import java.awt.GridLayout;
+import java.awt.Image;
+import java.awt.Panel;
+import java.awt.event.ActionListener;
+import java.util.ArrayList;
+import java.util.Arrays;
+
+import javax.swing.JFrame;
+import javax.swing.JPanel;
+import javax.swing.border.EmptyBorder;
+
+import guiDice.LabGuiDice;
+
+import java.awt.BorderLayout;
+import java.awt.Color;
+
+import javax.swing.ImageIcon;
+import javax.swing.JButton;
+import javax.swing.JCheckBox;
+import javax.swing.JRadioButton;
+import java.awt.event.ActionEvent;
+
+public class myFrame extends JFrame {
+	private ImageIcon cloud1 = new ImageIcon(myFrame.class.getResource("/ChangeImageResource/pics/cloud1.png"));
+	private ImageIcon cloud2 = new ImageIcon(myFrame.class.getResource("/ChangeImageResource/pics/cloud2.png"));
+	private ImageIcon cloud3 = new ImageIcon(myFrame.class.getResource("/ChangeImageResource/pics/cloud3.png"));
+	private ImageIcon grass1 = new ImageIcon(myFrame.class.getResource("/ChangeImageResource/pics/grass1.png"));
+	private ImageIcon grass2 = new ImageIcon(myFrame.class.getResource("/ChangeImageResource/pics/grass2.png"));
+	private ImageIcon grass3 = new ImageIcon(myFrame.class.getResource("/ChangeImageResource/pics/grass3.png"));
+	private ImageIcon sun1 = new ImageIcon(myFrame.class.getResource("/ChangeImageResource/pics/sun1.png"));
+	private ImageIcon sun2 = new ImageIcon(myFrame.class.getResource("/ChangeImageResource/pics/sun2.png"));
+	private ImageIcon sun3 = new ImageIcon(myFrame.class.getResource("/ChangeImageResource/pics/sun3.png"));
+	private int numCloud = 0;
+	private int numGrass = 0;
+	private int numSun = 0;
+	private int sunVert = 30;
+	private int sunHor = 10;
+	private int sunPos = 0;
+	private int cloudHor = 200;
+	private ArrayList<Image> clouds = new ArrayList<Image>(Arrays.asList(cloud1.getImage(),cloud2.getImage(),cloud3.getImage()));
+	private ArrayList<Image> grass = new ArrayList<Image>(Arrays.asList(grass1.getImage(),grass2.getImage(),grass3.getImage()));
+	private ArrayList<Image> Suns = new ArrayList<Image>(Arrays.asList(sun1.getImage(),sun2.getImage(),sun3.getImage()));
+	
+
+	private JPanel contentPane;
+
+	/**
+	 * Launch the application.
+	 */
+	public static void main(String[] args) {
+		EventQueue.invokeLater(new Runnable() {
+			public void run() {
+				try {
+					myFrame frame = new myFrame();
+					frame.setVisible(true);
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+			}
+		});
+	}
+
+	/**
+	 * Create the frame.
+	 */
+	public myFrame() {
+		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		setBounds(100, 100, 450, 300);
+		contentPane = new JPanel();
+		contentPane.setBorder(new EmptyBorder(5, 5, 5, 5));
+		setContentPane(contentPane);
+		contentPane.setLayout(new BorderLayout(0, 0));
+		JPanel controlPanel = controlPanel();
+		contentPane.add(controlPanel, BorderLayout.WEST);
+		JPanel mainPanel = mainPanel();
+		contentPane.add(mainPanel, BorderLayout.CENTER);
+		getContentPane().add(new picturePanel(), BorderLayout.CENTER);
+	}
+
+	private JPanel mainPanel() {
+		JPanel mainPanel = new JPanel();
+		mainPanel.setForeground(Color.CYAN);
+		mainPanel.setOpaque(true);
+		mainPanel.setBackground(Color.CYAN);
+		mainPanel.setLayout(new BorderLayout(0, 0));
+		return mainPanel;
+	}
+
+	private JPanel controlPanel() {
+		JPanel controlPanel = new JPanel();
+		controlPanel.setLayout(new GridLayout(4,1,10,10));
+			final JCheckBox cloudCheck = new JCheckBox("Clouds");
+			controlPanel.add(cloudCheck);
+			final JCheckBox sunCheck = new JCheckBox("Sun");
+			controlPanel.add(sunCheck);
+			final JCheckBox grassCheck = new JCheckBox("Grass");
+			controlPanel.add(grassCheck);
+			JButton btnNewButton = new JButton("Change");
+			btnNewButton.addActionListener(new ActionListener() {
+				public void actionPerformed(ActionEvent arg0) {
+					if (cloudCheck.isSelected()) {
+						if (numCloud!=2) {
+							numCloud++;
+						}
+						else {
+							numCloud = 0;
+					}
+					}
+				    if (sunCheck.isSelected()) {
+				    	if (numSun!=2) {
+				    		numSun++;
+				    	}
+				    	else {
+				    		numSun = 0;
+				    	}
+				    }
+				    if (grassCheck.isSelected()) {
+				    	if (numGrass!=2) {
+				    		numGrass ++;
+				    	}
+				    	else {
+				    		numGrass = 0;
+				    	}
+				    }
+				    if (!cloudCheck.isSelected()&&!grassCheck.isSelected()&&!sunCheck.isSelected()) {
+				    	if(sunPos==0) {
+				    		sunVert = 10;
+				    		sunHor = 140;
+				    		sunPos = 1;
+				    		cloudHor = 10;
+				    	}
+				    	else if(sunPos == 1){
+				    		sunVert = 30;
+				    		sunHor = 280;
+				    		sunPos = 2;
+				    		cloudHor = 100;
+				    	}
+				    	else if (sunPos == 2) {
+				    		sunVert = 30;
+				    		sunHor = 10;
+				    		sunPos = 0;
+				    		cloudHor = 200;
+				    	}
+				    }
+						
+				}
+			});
+			controlPanel.add(btnNewButton);
+		return controlPanel;
+	}
+protected class picturePanel extends JPanel {
+	/**
+	 * Create the panel.
+	 */
+	@Override
+	public void paint(Graphics g) {
+		super.paint(g); 
+		g.drawImage(clouds.get(numCloud),cloudHor,10,80,50, null);
+		g.drawImage(Suns.get(numSun),sunHor,sunVert,50,50,null);
+		g.drawImage(grass.get(numGrass),0,220,350,25,null);
+		repaint();
+	}
+
+}
+}
+
