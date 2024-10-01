@@ -1,0 +1,296 @@
+package myFinalProject;
+
+import javax.swing.JPanel;
+import java.awt.BorderLayout;
+import java.awt.Dimension;
+import java.awt.EventQueue;
+
+import javax.swing.JTextArea;
+import javax.swing.JButton;
+import javax.swing.JFrame;
+import javax.swing.JLabel;
+import javax.swing.JTextField;
+import java.awt.GridLayout;
+import java.awt.Font;
+import javax.swing.SwingConstants;
+
+import guiDice.LabGuiDice;
+
+import java.awt.event.ActionListener;
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Random;
+import java.awt.event.ActionEvent;
+import java.awt.Color;
+import java.awt.Desktop;
+
+
+public class MathRush extends JFrame {
+	private JTextField textField = new JTextField();
+	private static int myNum = 0;
+	private static ArrayList<String> myAnswers = new ArrayList<>();
+	private static ArrayList<String> myProblems = new ArrayList<>();
+	private static ArrayList<Integer> correctAnswers = new ArrayList<>();
+	private static int correct = 0;
+	private static ArrayList<Boolean> myBools = new ArrayList<>();
+ 
+	/**
+	 * Create the panel. and a new file
+	 */
+	public static void main(String[] args) {
+		try {
+			File myFile = new File("/Users/timothyfelt/eclipse-workspace/1410_LABS/src/fileWrite/answers.txt");
+			if (myFile.createNewFile()) {
+				System.out.println("File created: " + myFile.getName());
+			}else {
+				System.out.println("File already exists.");
+			}
+		}
+		catch (IOException e) {
+			System.out.println("An error occured.");
+			e.printStackTrace();
+		}
+		EventQueue.invokeLater(new Runnable() {
+			public void run() {
+				try {
+					MathRush frame = new MathRush();
+					frame.setVisible(true);
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+				
+			}
+		});
+	}
+	public MathRush() {
+		
+		
+		/**
+		 * Sets up the content pane and adds a panel in the bottom that contains either an enter button, 
+		 * an enter button and text field, or 3 buttons depending upon the slide number
+		 */
+		getContentPane().setLayout(new BorderLayout(0, 0));
+		setBounds(100, 100, 450, 300);
+		
+		JPanel panel = new JPanel();
+		getContentPane().add(panel, BorderLayout.SOUTH);
+		panel.setLayout(new GridLayout(0, 1, 0, 0));
+		
+		JLabel lblNewLabel = myLabel();
+		getContentPane().add(lblNewLabel, BorderLayout.CENTER);
+		
+		JButton btnNewButton = myButton();
+		panel.add(btnNewButton);
+		
+		JButton btn2 = myButton2();
+		
+		JButton btn3 = myButton3();
+		
+		/**
+		 * if the Enter button is pressed, the slide number is changed and the bottom panel is sometimes changed. For certain slides, getRandomProblem is called 
+		 * to get a random math problem. If you have reached the answers slide, the arrays with the problems, your answers, and correct answers are written 
+		 * to a file and calcScore is called to write out the correct number of answers over 10.
+		 */
+		btnNewButton.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				if(e.getSource()==btnNewButton) {
+					if(myNum==0) {
+						lblNewLabel.setText("<html> In this game, you will enter the answer "
+								+ "<br>to 10 math problems above and then press enter");
+						System.out.println(myNum);
+						myNum+=1;
+						}
+					else if(myNum>0 && myNum<11) {
+						lblNewLabel.setText(getRandomMathProblem());
+						panel.setLayout(new GridLayout(0,2,0,0));
+						panel.add(textField);
+						System.out.println(myNum);
+						System.out.println(textField.getText());
+						if(myNum>1 && myNum<11) {
+							if(textField.getText().equals("")){
+								myAnswers.add("0");
+								System.out.println("added 0 to array");
+							}
+							else {
+							myAnswers.add(textField.getText());
+							System.out.println("added number to array");
+							}
+							textField.setText("");
+						}
+						myNum+=1;
+					}
+					else if(myNum==11) {
+						myNum+=1;
+						if(textField.getText().equals("")){
+							myAnswers.add("0");
+							System.out.println("added 0 to array");
+						}
+						else {
+						myAnswers.add(textField.getText());
+						System.out.println("added number to array");
+						}
+						textField.setText("");
+						lblNewLabel.setText(calcScore());
+						System.out.println(calcScore());
+						panel.remove(textField);
+						panel.setLayout(new GridLayout(0,3,0,0));
+						panel.add(btn3);
+						panel.add(btn2);
+						try {
+							FileWriter myWriter = new FileWriter("/Users/timothyfelt/eclipse-workspace/1410_LABS/src/fileWrite/answers.txt");
+							for(int i = 0; i < 10;i++) {
+								
+							String myString = String.format("for \"%-12s\"  Your answer was: %2s The correct answer was: %3s %25s \n",myProblems.get(i), myAnswers.get(i), correctAnswers.get(i), myBools.get(i));
+							myWriter.write(myString);
+							}
+							myWriter.close();
+							System.out.println("Successfully wrote to file");
+						}
+						catch (IOException e2) {
+							System.out.println("An error occurred.");
+							e2.printStackTrace();
+						}
+					}
+				}
+			}
+		});
+		/**
+		 * if the "Try Again?" button is pressed, the arrays containing the answers, your answers, and problems are cleared and the slide is reset
+		 * to the first problem slide
+		 */
+		btn2.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				if(e.getSource()==btn2) {
+				myAnswers.clear();
+				myProblems.clear();
+				correctAnswers.clear();
+				correct = 0;
+				myNum=1;
+				lblNewLabel.setText("Hit Enter to restart");
+				panel.remove(btn2);
+				panel.remove(btn3);
+				panel.setLayout(new GridLayout(0,1,0,0));
+				}
+			}
+		});
+		/**
+		 * if the button get details is pressed, the document containing the problems and answers is opened
+		 */
+		btn3.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				if(e.getSource()==btn3) {
+					try {
+					File file = new File("/Users/timothyfelt/eclipse-workspace/1410_LABS/src/fileWrite/answers.txt");
+					Desktop desktop = Desktop.getDesktop();
+					if(file.exists()) {
+						desktop.open(file);
+					}
+					
+				}
+					catch(Exception e1) {
+						e1.printStackTrace();
+					}
+				}
+			}
+		});
+	}
+	/**
+	 * creates the label that displays the text for the Math problems and introduction
+	 * @return a label
+	 */
+	private JLabel myLabel() {
+		JLabel lblNewLabel = new JLabel("<html>Welcome to Math Rush<br>    Press Enter to Start</html>");
+		lblNewLabel.setHorizontalAlignment(SwingConstants.CENTER);
+		lblNewLabel.setFont(new Font("Lucida Grande", Font.PLAIN, 38));
+		return lblNewLabel;
+	}
+	/**
+	 * creates a new button "Try Again?"
+	 * @return button "Try Again?"
+	 */
+	private JButton myButton2() {
+		JButton btnNewButton = new JButton("Try Again?");
+		return btnNewButton;
+	}
+	/**
+	 * creates the button "See details"
+	 * @return button "See details"
+	 */
+	private JButton myButton3() {
+		JButton btnNewButton = new JButton("See details");
+		return btnNewButton;
+	}
+	/**
+	 * Creates the enter button;
+	 * @return the enter button
+	 */
+	private JButton myButton() {
+		JButton btnNewButton = new JButton("Enter");
+		btnNewButton.setForeground(Color.BLACK);
+		btnNewButton.setBackground(Color.WHITE);
+		btnNewButton.setOpaque(true);
+		btnNewButton.setSize(new Dimension(5000,100));
+		return btnNewButton;
+	}
+	/**
+	 * uses the Random Class to create a problem with a random number, random operation, and one more random number
+	 * and puts that problem in an array
+	 * Also calculates the created math problem answer and stores that answer in another array
+	 * @return a string of a math problem
+	 */
+	private String getRandomMathProblem() {
+		int myAnswer = 0;
+		char myMath = '\0';
+		Random myRand = new Random();
+		Random mySymbol = new Random();
+		int myFirstNumber = myRand.nextInt(12)+1;
+		int mySecondNumber = myRand.nextInt(12)+1;
+		int myNumber = mySymbol.nextInt(3);
+			if (myNumber == 0) {
+				myMath = '+';
+				correctAnswers.add(myFirstNumber+mySecondNumber);
+			}
+			else if (myNumber==1) {
+				myMath = '-';
+				correctAnswers.add(myFirstNumber-mySecondNumber);
+			}
+			else if (myNumber==2) {
+				myMath = '*';
+				correctAnswers.add(myFirstNumber*mySecondNumber);
+			}
+			else {
+				System.out.println("OUt of bounds");
+			}
+			String myString = "What is " + myFirstNumber + myMath + mySecondNumber;
+			
+			myProblems.add(myString);
+		return myString;
+	}
+	/**
+	 * compares your answer to each problem to the correct answer of each problem and determines if they are correct. 
+	 * If they are add that to the overall number correct and return that in the form of a string being the correct number over 10
+	 * @return a string of the correct answer
+	 */
+	private String calcScore() {
+		for (int i = 0; i < myAnswers.size(); i++) {
+			int number = Integer.parseInt(myAnswers.get(i));
+			if (number == correctAnswers.get(i)) {
+				correct += 1;
+				boolean myBool = true;
+				myBools.add(myBool);
+			}
+			else {
+				boolean myBool = false;
+				myBools.add(myBool);
+			}
+		}
+		String myCorrect = "You got " + correct + "/10 correct";
+	return myCorrect;
+	}	
+
+}
